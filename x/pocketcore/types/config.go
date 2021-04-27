@@ -3,7 +3,6 @@ package types
 import (
 	"encoding/hex"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/pokt-network/pocket-core/types"
@@ -22,11 +21,11 @@ var (
 )
 
 // "InitConfig" - Initializes the cache for sessions and evidence
-func InitConfig(chains *HostedBlockchains, logger log.Logger, c types.Config) {
+func InitConfig(chains *HostedBlockchains, logger log.Logger, c types.Config, useSyncMap bool) {
 	cacheOnce.Do(func() {
 		globalEvidenceCache = new(CacheStorage)
 		globalSessionCache = new(CacheStorage)
-		globalEvidenceSealedMap = sync.Map{}
+		globalEvidenceSealedMap = NewCustomSyncMap(useSyncMap)
 		globalEvidenceCache.Init(c.PocketConfig.DataDir, c.PocketConfig.EvidenceDBName, c.TendermintConfig.LevelDBOptions, c.PocketConfig.MaxEvidenceCacheEntires)
 		globalSessionCache.Init(c.PocketConfig.DataDir, c.PocketConfig.SessionDBName, c.TendermintConfig.LevelDBOptions, c.PocketConfig.MaxSessionCacheEntries)
 		InitGlobalServiceMetric(chains, logger, c.PocketConfig.PrometheusAddr, c.PocketConfig.PrometheusMaxOpenfiles)
@@ -36,7 +35,7 @@ func InitConfig(chains *HostedBlockchains, logger log.Logger, c types.Config) {
 }
 
 func ConvertEvidenceToProto(config types.Config) error {
-	InitConfig(nil, log.NewNopLogger(), config)
+	InitConfig(nil, log.NewNopLogger(), config, false)
 	gec := globalEvidenceCache
 	it, err := gec.Iterator()
 	if err != nil {

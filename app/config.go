@@ -71,7 +71,7 @@ const (
 	DefaultGenesisType
 )
 
-func InitApp(datadir, tmNode, persistentPeers, seeds, remoteCLIURL string, keybase bool, genesisType GenesisType) *node.Node {
+func InitApp(datadir, tmNode, persistentPeers, seeds, remoteCLIURL string, keybase bool, genesisType GenesisType, useSyncMap bool) *node.Node {
 	// init config
 	InitConfig(datadir, tmNode, persistentPeers, seeds, remoteCLIURL)
 	// init AuthToken
@@ -83,7 +83,7 @@ func InitApp(datadir, tmNode, persistentPeers, seeds, remoteCLIURL string, keyba
 	// create logger
 	logger := InitLogger()
 	// init cache
-	InitPocketCoreConfig(chains, logger)
+	InitPocketCoreConfig(chains, logger, useSyncMap)
 	// init genesis
 	InitGenesis(genesisType)
 	// log the config and chains
@@ -370,8 +370,8 @@ func InitLogger() (logger log.Logger) {
 	return
 }
 
-func InitPocketCoreConfig(chains *types.HostedBlockchains, logger log.Logger) {
-	types.InitConfig(chains, logger, GlobalConfig)
+func InitPocketCoreConfig(chains *types.HostedBlockchains, logger log.Logger, useSyncMap bool) {
+	types.InitConfig(chains, logger, GlobalConfig, useSyncMap)
 	sdk.InitCtxCache(GlobalConfig.PocketConfig.CtxCacheSize)
 	nodesTypes.InitConfig(GlobalConfig.PocketConfig.ValidatorCacheSize)
 	appsTypes.InitConfig(GlobalConfig.PocketConfig.ApplicationCacheSize)
